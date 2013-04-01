@@ -28,6 +28,7 @@ document.webL10n = (function(window, document, undefined) {
   var gTextData = '';
   var gTextProp = 'textContent';
   var gLanguage = '';
+  var gLanguages = [];
   var gMacros = {};
   var gReadyState = 'loading';
 
@@ -221,6 +222,11 @@ document.webL10n = (function(window, document, undefined) {
             if (reSection.test(line)) { // section start?
               match = reSection.exec(line);
               currentLang = match[1];
+              
+              if(gLanguages.indexOf(currentLang)<0&&currentLang !== '*') {
+                gLanguages.push(currentLang);
+              }
+              
               skipLang = (currentLang !== '*') &&
                   (currentLang !== lang) && (currentLang !== genericLang);
               continue;
@@ -306,6 +312,10 @@ document.webL10n = (function(window, document, undefined) {
       // we might have a pre-compiled dictionary instead
       var dict = getL10nDictionary();
       if (dict && dict.locales && dict.default_locale) {
+        for(var l in dict.locales) {
+            gLanguages.push(l);
+        }
+      
         consoleLog('using the embedded JSON directory, early way out');
         gL10nData = dict.locales[lang] || dict.locales[dict.default_locale];
         callback();
@@ -359,6 +369,7 @@ document.webL10n = (function(window, document, undefined) {
     gL10nData = {};
     gTextData = '';
     gLanguage = '';
+    gLanguages = [];
     // TODO: clear all non predefined macros.
     // There's no such macro /yet/ but we're planning to have some...
   }
@@ -1103,6 +1114,7 @@ document.webL10n = (function(window, document, undefined) {
 
     // get|set the document language
     getLanguage: function() { return gLanguage; },
+    getLanguages: function() {return gLanguages; },
     setLanguage: function(lang) { loadLocale(lang, translateFragment); },
 
     // get the direction (ltr|rtl) of the current language
